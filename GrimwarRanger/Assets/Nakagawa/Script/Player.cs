@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     public Enemy enemy;
     public Enemy2 enemy2;
     public int attackCount = 0;
+    public BookEnd m_bookEnd;
     private bool bookChange = false;
     public PActionGauge aGauge;
     public Hp hp;
@@ -46,8 +47,8 @@ public class Player : MonoBehaviour
 
     private void Fire()
     {
-            //if文追加
-            if (maxAtack < damege)
+        //if文追加
+        if (maxAtack < damege)
             {
                 maxAtack = damege;
                 kuraiDamage = (int)hp.GetDamage();
@@ -149,7 +150,7 @@ public class Player : MonoBehaviour
         if (enemy != null && enemy._specialFire)
         {
             _ImageRenderer.color = new Color(1.0f, 0.0f, 0.0f);
-            if (aGauge.attack == true && attackCount <= 3)
+            if (m_bookEnd.m_GOattack == true && attackCount <= 3)
             {
                 BossSpecialFire();
                // aGauge.attack = false;
@@ -158,7 +159,7 @@ public class Player : MonoBehaviour
                 m_Attack = true;
                 attackCount++;
             }
-            if (aGauge.attack == true && attackCount == 4)
+            if (m_bookEnd.m_GOattack == true && attackCount == 4)
             {
                 enemy._specialFire = false;
                 Fire();
@@ -174,7 +175,8 @@ public class Player : MonoBehaviour
                 count += Time.deltaTime;
                 if (count > 1.0)
                 {
-                    fire = false;
+                    m_bookEnd.m_GOattack = false;
+               //     fire = false;
               //      aGauge.gaugeClear = true;
                     pAttack.text = "0";
                     m_i = false;
@@ -185,7 +187,7 @@ public class Player : MonoBehaviour
         else
         {
             _ImageRenderer.color = new Color(1.0f, 1.0f, 1.0f);
-            if (aGauge.attack == true)
+            if (m_bookEnd.m_GOattack == true)
             {
                 Fire();
             //    aGauge.attack = false;
@@ -199,7 +201,8 @@ public class Player : MonoBehaviour
                 count += Time.deltaTime;
                 if (count > 1.0)
                 {
-                    fire = false;
+                    m_bookEnd.m_GOattack = false;
+                 //   fire = false;
             //        aGauge.gaugeClear = true;
                     pAttack.text = "0";
                     m_i = false;

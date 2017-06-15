@@ -9,6 +9,7 @@ public class PActionGauge : MonoBehaviour {
     public bool flag;               //速度変化のフラグ
     public bool gaugeClear;         //ゲージ初期化のフラグ
     public bool attack = false;     //攻撃感知のフラグ
+    public bool m_stop = false;     //一時的にゲージの進行を止めるためのフラグ
     private bool end = false;
 
     void Start()
@@ -29,12 +30,12 @@ public class PActionGauge : MonoBehaviour {
         }
 
         //速い速度のゲージ
-        if (m_count <= m_max && flag == true)
+        if (m_count <= m_max && flag == true && m_stop == false)
         {
             m_count += speed * Time.deltaTime;
         }
         //遅い速度のゲージ
-        else if (flag == false)
+        else if (flag == false && m_stop == false)
         {
             m_count += slowSpeed * Time.deltaTime;
         }

@@ -12,6 +12,7 @@ public class BookEnd : MonoBehaviour
     public float m_value;//魔力メータの数値
     public float m_Zposition = -2.2f;       //rayの微調整用数値
     public Player m_Player;                 //プレイヤー
+    public GameObject m_Enemy;
     public GameController m_GC;             //ゲームコントローラー
     public bool _attack = false;            //攻撃の検知
     public Text m_Text;
@@ -30,13 +31,16 @@ public class BookEnd : MonoBehaviour
     public PActionGauge _aGauge;
     private Vector2 m_pos;
     public float pushPower = 0.2f;
+    public GameObject m_Arrow;
     public SpriteRenderer m_AttackBoal;
     public ParticleSystem m_Attackparticle;
+    public bool m_GOattack = false, _boalAttack = false;
     private bool m_BookDesfrag = false ,m_fAttackBoalPos = false;
     private float m_destroyCount = 0.0f;
     private int m_value2 = 50;
     private float boal_count = 0.0f;
     private float m_bookDestroy = 0.0f;
+
 
     // Use this for initialization
     void Start()
@@ -49,12 +53,12 @@ public class BookEnd : MonoBehaviour
         Mete(transform.position, m_PairBookEnd.transform.position);
         m_pos = transform.position;
         m_AttackBoal.enabled = false;
+        m_Arrow.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
     }
 
     // Update is called once per frame
     void Update()
     {
-        BookEndMove();
         Debug.DrawRay(m_Ray.origin, m_Direction, Color.red);
         RayUpdate();
         if (m_value2 <= m_value)
@@ -62,12 +66,44 @@ public class BookEnd : MonoBehaviour
             m_mGauge.fillAmount += 0.1f;
             m_value2 += 50;
         }
-
+        if (_aGauge.attack == true)
+        {
+            m_Arrow.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+            if (Input.GetMouseButtonDown(0))//Androidの場合は Input.touchCount>0
+            {
+                // スクリーン座標を三次元のRayに変換する
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                // Raycastの結果格納用オブジェクト
+                RaycastHit hitInfo;
+                // RaycastでRayを飛ばして何かに当たったか調べる
+                bool hit = Physics.Raycast(ray, out hitInfo);
+                if (hit && hitInfo.collider.tag == "Arrow")
+                {
+                    BookEndMove();
+                }
+            }
+        }
+        else
+        {
+            m_Arrow.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
+        }
         if (m_BookDesfrag == true)
         {
+            _aGauge.attack = false;
             Invoke("BookDestry", 2.0f);
             Invoke("AttackBoalPos", 2.0f);
-            m_BookDesfrag = false;
+            m_GOattack = true;
+            if (m_Player.fire)
+            {
+                LeanTween.move(m_AttackBoal.gameObject, new Vector2(m_Enemy.gameObject.transform.position.x, m_Enemy.gameObject.transform.position.y), .5f)
+                    .setDelay(4f)
+                .setOnComplete(() => {
+                    _boalAttack = true;
+                    m_Player.fire = false;
+                    _aGauge.m_stop = false;
+                });
+            }
+            // m_BookDesfrag = false;
         }
 
         // m_minute.transform.eulerAngles = new Vector3(0, 0, -m_value);
@@ -304,9 +340,7 @@ public class BookEnd : MonoBehaviour
 
     public void BookEndMove()
     {
-        if (_aGauge.attack == true)
-        {
-            m_MoveCount = 0;
+        m_MoveCount = 0;
             m_value = 0;
             m_SStrCount--;
             m_MStrCount--;
@@ -325,18 +359,12 @@ public class BookEnd : MonoBehaviour
                     LeanTween.move(this.gameObject, new Vector2(BookEndPos.position.x, this.gameObject.transform.position.y), 0.5f)
                              .setDelay(1f);
                     m_Attackparticle.Play();
-                    _aGauge.attack = false;
                     m_BookDesfrag = true;
+                    _aGauge.m_stop = true;
                     _aGauge.gaugeClear = true;
                     m_AttackBoal.enabled = true;
                     m_fAttackBoalPos = true;
                 });
-        }
-        else
-        {
-            
-        }
-
     }
 
     public void OnControllerColliderHit(ControllerColliderHit hit)
